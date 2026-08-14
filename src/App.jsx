@@ -5,7 +5,12 @@ function GroceryItem (props) {
 	return (
 		<li className = "fruit-item">
 			{props.name} - Quantity : {quantity}
-			<button onClick = { () => setQuantity(quantity+1)}>Add</button>
+			<button onClick = { () => setQuantity(quantity+1)}>
+				Add
+			</button>
+			<button onClick = {() => props.triggerDelete(props.name)}>
+				Delete
+			</button>
 		</li>
 		
 	);
@@ -19,6 +24,9 @@ function App() {
 		setGroceries([...groceries, inputValue]);
 		setInputValue("");
 	}
+	function handleDelete(itemToDelete) {
+		setGroceries(groceries.filter(item => item != itemToDelete));
+	}
 	return ( 
 		<div> 
 			<input
@@ -30,7 +38,7 @@ function App() {
 				Add Item
 			</button>
 			<ul>
-				{groceries.map(item => <GroceryItem key = {item} name = {item} />)}
+				{groceries.map(item => <GroceryItem key = {item} name = {item} triggerDelete = {handleDelete}/>)}
 			</ul>
 		</div> 
 	); 
