@@ -1,4 +1,4 @@
-import { useState } from 'react'; 
+import { useState, useEffect} from 'react'; 
 function GroceryItem (props) {
 	const [quantity, setQuantity] = useState(1); 
 	
@@ -17,16 +17,21 @@ function GroceryItem (props) {
 }
 
 function App() { 
-	const [groceries, setGroceries] = useState(["apple", "banana", "orange"]);
+	const [groceries, setGroceries] = useState(
+		JSON.parse(localStorage.getItem("groceries-list")) || ["apple", "banana", "orange"]);
 	const [inputValue, setInputValue] = useState("");
-
+	
+	useEffect(() => {
+		localStorage.setItem("groceries-list", JSON.stringify(groceries));
+	}, [groceries]);
 	function handleAdd() {
 		setGroceries([...groceries, inputValue]);
 		setInputValue("");
 	}
 	function handleDelete(itemToDelete) {
-		setGroceries(groceries.filter(item => item != itemToDelete));
+		setGroceries(groceries.filter(item => item !== itemToDelete));
 	}
+
 	return ( 
 		<div> 
 			<input
