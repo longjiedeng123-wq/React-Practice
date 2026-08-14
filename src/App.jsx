@@ -25,6 +25,12 @@ function App() {
 		localStorage.setItem("groceries-list", JSON.stringify(groceries));
 	}, [groceries]);
 	function handleAdd() {
+		if (inputValue.trim() === "") return;
+
+		if (groceries.includes(inputValue)) {
+			alert("Item already exists in the list!");
+			return;
+		}
 		setGroceries([...groceries, inputValue]);
 		setInputValue("");
 	}
