@@ -23,7 +23,11 @@ function App() {
 		localStorage.setItem("groceries-list", JSON.stringify(groceries));
 	}, [groceries]);
 	function handleAdd(inputValue, errorMessage) {
-		const cleanedInput = inputValue.trim().toLowerCase().replace(/\s+/g, ' ');
+		const WHITELIST_REGEX = /[^a-zA-Z0-9 ]/g;
+		if (WHITELIST_REGEX.test(inputValue)) {
+      		inputValue = inputValue.replace(WHITELIST_REGEX, "");
+    	}
+		const cleanedInput = inputValue.trim().toLowerCase().replace(WHITELIST_REGEX, '').replace(/\s+/g, ' ');
 		const isDuplicate = groceries.some(item => item.trim().toLowerCase() === cleanedInput);
 		if (isDuplicate) {
 			let randomErrorMessage;
