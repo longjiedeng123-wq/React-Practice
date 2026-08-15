@@ -33,6 +33,14 @@ button:disabled {
   background-color: #cccccc;
   cursor: not-allowed;
 }
+.surprise-btn {
+  width: 100%;
+  padding: 12px;
+  color: white;
+  border-radius: 8px;
+  font-size: 16px;
+  margin-bottom: 20px;
+}
 
 .surprise-btn:hover{
   width: 100%;
@@ -73,14 +81,17 @@ button:disabled {
   margin-bottom: 10px;
   border-radius: 8px;
   box-shadow: 0 2px 4px rgba(0, 0, 0, 0.5);
+  word-break: break-word;
 }
 
 .plus-btn {
   margin-left: auto;
+  white-space: nowrap;
   margin-right: 10px;
 }
 
 .delete-btn {
+  white-space: nowrap;
 }
 
 .delete-btn:hover{
