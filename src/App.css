@@ -61,8 +61,8 @@ button:disabled {
 .grocery-item {
   display: flex;
   justify-content: space-between;
-  align-items: center;
   background-color: #f8f9fa;
+  align-items: center;
   padding: 12px 16px;
   margin-bottom: 10px;
   border-radius: 8px;
@@ -70,9 +70,8 @@ button:disabled {
 }
 
 .plus-btn {
-  display: flex;
-  gap: 8px;
-   
+  margin-left: auto;
+  margin-right: 10px;
 }
 
 .delete-btn {
