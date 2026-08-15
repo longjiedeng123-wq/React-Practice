@@ -1,3 +1,4 @@
+import './App.css';
 import { useState, useEffect} from 'react';
 import AddForm from './AddForm.jsx'; 
 import GroceryItem from './GroceryItem.jsx';
@@ -37,12 +38,18 @@ function App() {
 	}
 	
 	return ( 
-		<div> 
+		<div className = "app-container"> 
+			<h1 className = "app-title">
+				Grocery List
+			</h1>
 			<AddForm triggerAdd = {handleAdd}/>
-			<button onClick = {handleFetchRandom} disabled={isLoading}>
-				{isLoading ? "Fetching ..." : "Suprise Me!"}
+			<button 
+				className = "surprise-btn"
+				onClick = {handleFetchRandom} 
+				disabled={isLoading}>
+					{isLoading ? "Fetching ..." : "Suprise Me!"}
 			</button>
-			<ul>
+			<ul className = "grocery-list">
 				{groceries.map(item => <GroceryItem key = {item} name = {item} triggerDelete = {handleDelete}/>)}
 			</ul>
 		</div> 

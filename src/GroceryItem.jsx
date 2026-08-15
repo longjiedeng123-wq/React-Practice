@@ -1,15 +1,22 @@
 import { useState } from 'react';
+import './App.css';
 function GroceryItem (props) {
     const [quantity, setQuantity] = useState(1); 
     
     return (
-        <li className = "fruit-item">
-            {props.name} - Quantity : {quantity}
-            <button onClick = { () => setQuantity(quantity+1)}>
-                Add
+        <li className = "grocery-item">
+            <span className = "item-name">
+                {props.name} - Quantity : {quantity}
+            </span>
+            <button 
+                className = "plus-btn"
+                onClick = { () => setQuantity(quantity+1)}>
+                    Plus
             </button>
-            <button onClick = {() => props.triggerDelete(props.name)}>
-                Delete
+            <button
+                className = "delete-btn"
+                onClick = {() => props.triggerDelete(props.name)}>
+                    Delete
             </button>
         </li>
         

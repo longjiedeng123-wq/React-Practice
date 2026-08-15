@@ -1,4 +1,5 @@
 import { useState } from "react";
+import './App.css';
 function AddForm(props) {
     const [inputValue, setInputValue] = useState("");
     function handleSubmit() {
@@ -7,13 +8,17 @@ function AddForm(props) {
         setInputValue("");
     }
     return (
-        <div>
-            <input
+        <div className = "add-form">
+            <input 
+                className = "add-input"
                 type = "text"
                 value = {inputValue}
                 onChange = {(e) => setInputValue(e.target.value)}
+                placeholder = "Enter an item..."
             />
-            <button onClick = {handleSubmit}>
+            <button 
+                className = "add-btn"
+                onClick = {handleSubmit}>
                 Add item
             </button>
         </div>
