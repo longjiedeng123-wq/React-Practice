@@ -5,7 +5,7 @@ import GroceryItem from './GroceryItem.jsx';
 function App() { 
 	const [groceries, setGroceries] = useState(
 		JSON.parse(localStorage.getItem("groceries-list")) || ["apple", "banana", "orange"]);
-	
+	const [isLoading, setIsLoading] = useState(false);
 	
 	useEffect(() => {
 		localStorage.setItem("groceries-list", JSON.stringify(groceries));
@@ -21,6 +21,7 @@ function App() {
 		setGroceries(groceries.filter(item => item !== itemToDelete));
 	}
 	function handleFetchRandom() {
+		setIsLoading(true);
 		fetch("https://www.themealdb.com/api/json/v1/1/random.php")
 		.then(response => response.json())
 		.then(data => {
@@ -28,13 +29,18 @@ function App() {
 			console.log(recipeName);
 			setGroceries([...groceries, recipeName]);
 		})
+		.catch(error => {
+			alert("Failed to fetch random recipe. Please try again later.");
+			console.error("Fetch error:",error);
+		})
+		.finally(() => setIsLoading(false));
 	}
 	
 	return ( 
 		<div> 
 			<AddForm triggerAdd = {handleAdd}/>
-			<button onClick = {handleFetchRandom}>
-				Suprise Me!
+			<button onClick = {handleFetchRandom} disabled={isLoading}>
+				{isLoading ? "Fetching ..." : "Suprise Me!"}
 			</button>
 			<ul>
 				{groceries.map(item => <GroceryItem key = {item} name = {item} triggerDelete = {handleDelete}/>)}
