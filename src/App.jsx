@@ -20,10 +20,22 @@ function App() {
 	function handleDelete(itemToDelete) {
 		setGroceries(groceries.filter(item => item !== itemToDelete));
 	}
-
+	function handleFetchRandom() {
+		fetch("https://www.themealdb.com/api/json/v1/1/random.php")
+		.then(response => response.json())
+		.then(data => {
+			const recipeName = data.meals[0].strMeal;
+			console.log(recipeName);
+			setGroceries([...groceries, recipeName]);
+		})
+	}
+	
 	return ( 
 		<div> 
 			<AddForm triggerAdd = {handleAdd}/>
+			<button onClick = {handleFetchRandom}>
+				Suprise Me!
+			</button>
 			<ul>
 				{groceries.map(item => <GroceryItem key = {item} name = {item} triggerDelete = {handleDelete}/>)}
 			</ul>
