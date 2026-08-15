@@ -36,7 +36,9 @@ function App() {
 		})
 		.finally(() => setIsLoading(false));
 	}
-	
+	function triggerSecret() {
+		window.open("https://www.youtube.com/watch?v=dQw4w9WgXcQ", "-blank");
+	}
 	return ( 
 		<div className = "app-container"> 
 			<h1 className = "app-title">
@@ -52,6 +54,12 @@ function App() {
 			<ul className = "grocery-list">
 				{groceries.map(item => <GroceryItem key = {item} name = {item} triggerDelete = {handleDelete}/>)}
 			</ul>
+			<button 
+				className = 'secret-btn'
+				onClick ={triggerSecret}
+			>
+				Don't click me!
+			</button>
 		</div> 
 	); 
 }
