@@ -37,7 +37,7 @@ function App() {
 		.finally(() => setIsLoading(false));
 	}
 	function triggerSecret() {
-		window.open("https://www.youtube.com/watch?v=dQw4w9WgXcQ", "-blank");
+		window.open("https://www.youtube.com/watch?v=G8iEMVr7GFg", "-blank");
 	}
 	return ( 
 		<div className = "app-container"> 
