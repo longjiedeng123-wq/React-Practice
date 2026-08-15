@@ -45,9 +45,15 @@ button:disabled {
   margin-bottom: 20px;
 }
 
+.input-container{
+  flex: 1;
+  flex-direction: column;
+}
+
 .add-input {
   flex: 1;
   padding: 10px;
+  width: 100%;
   border: 1px solid #cccccc;
   border-radius: 8px;
   font-size: 16px;

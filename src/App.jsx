@@ -7,16 +7,33 @@ function App() {
 	const [groceries, setGroceries] = useState(
 		JSON.parse(localStorage.getItem("groceries-list")) || ["apple", "banana", "orange"]);
 	const [isLoading, setIsLoading] = useState(false);
-	
+	const errorMessageBank = [
+		"Space doesn't work anymore, no~", 
+		"Nice try, but you can't add duplicates!",
+		"Unfortunately, you have to find a better way to add duplicates",
+		"How dare you try to add duplicates, you should be ashamed of yourself",
+		"Don't do that, the system will be unhappy",
+		"HaHaHa, this system is duplicate-proof, I know~I know~",
+		"Error 404: Originality not found. That item is already here!",
+		"Bro, you already typed this. Are we stuck in a time loop?",
+		"The grocery list gods reject your duplicate offering.",
+		"Deja vu! I just saw this item a second ago.",
+		"Task failed successfully: you found an item that already exists!"];
 	useEffect(() => {
 		localStorage.setItem("groceries-list", JSON.stringify(groceries));
 	}, [groceries]);
-	function handleAdd(inputValue) {
-		if (groceries.includes(inputValue)) {
-			alert("Item already exists in the list!");
-			return;
+	function handleAdd(inputValue, errorMessage) {
+		const cleanedInput = inputValue.trim().toLowerCase();
+		const isDuplicate = groceries.some(item => item.trim().toLowerCase() === cleanedInput);
+		if (isDuplicate) {
+			let randomErrorMessage;
+			do {
+				randomErrorMessage = errorMessageBank[Math.floor(Math.random() * errorMessageBank.length)];
+			} while (randomErrorMessage === errorMessage)
+			return randomErrorMessage;
 		}
-		setGroceries([...groceries, inputValue]);
+		setGroceries([...groceries, cleanedInput]);
+		return "";
 	}
 	function handleDelete(itemToDelete) {
 		setGroceries(groceries.filter(item => item !== itemToDelete));
