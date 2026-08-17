@@ -1,7 +1,23 @@
 from fastapi import FastAPI
+from fastapi.middleware.cors import CORSMiddleware
+
 from scraper import scrape_ad_images
 from ai_extractor import extract_prices
+
 app = FastAPI()
+
+origins = [
+    "http://localhost:5173",
+    "http://127.0.0.1:5173"
+]
+
+app.add_middleware(
+    CORSMiddleware,
+    allow_origin=origins,
+    allow_credentials=True,
+    allow_methods=["*"],
+    allow_headers=["*"]
+)
 
 @app.get("/")
 def root():
@@ -24,3 +40,4 @@ def get_grocery_prices():
         "total_items" : len(all_products),
         "data" : all_products
     }
+
