@@ -30,7 +30,13 @@ function App() {
       		inputValue = inputValue.replace(WHITELIST_REGEX, "");
     	}
 		const cleanedInput = inputValue.trim().toLowerCase().replace(WHITELIST_REGEX, '').replace(/\s+/g, ' ');
-		const isDuplicate = groceries.some(item => item.trim().toLowerCase() === cleanedInput);
+		// Update duplicate check to safely handle both strings and objects
+        const isDuplicate = groceries.some(item => {
+            // If it's an object, grab the english_name. Otherwise, just use the string.
+            const itemName = typeof item === 'object' && item !== null ? item.english_name : item;
+            
+            return itemName.trim().toLowerCase() === cleanedInput;
+        });
 		if (isDuplicate) {
 			let randomErrorMessage;
 			do {
@@ -65,6 +71,9 @@ function App() {
 	function handleFetchedItems(items) {
 		setGroceries([...groceries, ...items]);
 	}
+	function removeAllItem() {
+		setGroceries([]);
+	}
 	return ( 
 		<div className = "app-container"> 
 			<h1 className = "app-title">
@@ -80,7 +89,14 @@ function App() {
                 </button>
                 
                 <Fetch99Ranch updateGroceries={handleFetchedItems} />
+				<button 
+					className="remove-all-btn"
+					onClick={removeAllItem}
+				>
+					remove all
+				</button>
             </div>
+			
 			<ul className="grocery-list">
                 {groceries.map((item, index) => {
                     const isObject = typeof item === 'object' && item !== null;
