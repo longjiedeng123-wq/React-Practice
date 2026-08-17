@@ -2,7 +2,7 @@ import './App.css';
 import { useState, useEffect} from 'react';
 import AddForm from './AddForm.jsx'; 
 import GroceryItem from './GroceryItem.jsx';
-import fetch99Ranch from './Fetch99Ranch.jsx';
+import Fetch99Ranch from './Fetch99Ranch.jsx';
 
 function App() { 
 	const [groceries, setGroceries] = useState(
@@ -71,16 +71,32 @@ function App() {
 				Grocery List
 			</h1>
 			<AddForm triggerAdd = {handleAdd}/>
-			<button 
-				className = "surprise-btn"
-				onClick = {handleFetchRandom} 
-				disabled={isLoading}>
-					{isLoading ? "Fetching ..." : "Surprise Me!"}
-			</button>
-			<Fetch99Ranch updateGroceries={handleFetchedItems} />
-			<ul className = "grocery-list">
-				{groceries.map(item => <GroceryItem key = {item} name = {item} triggerDelete = {handleDelete}/>)}
-			</ul>
+			<div className="button-group">
+                <button 
+                    className="surprise-btn"
+                    onClick={handleFetchRandom} 
+                    disabled={isLoading}>
+                        {isLoading ? "Fetching ..." : "Surprise Me!"}
+                </button>
+                
+                <Fetch99Ranch updateGroceries={handleFetchedItems} />
+            </div>
+			<ul className="grocery-list">
+                {groceries.map((item, index) => {
+                    const isObject = typeof item === 'object' && item !== null;
+                    const itemName = isObject ? item.english_name : item;
+                    
+                    return (
+                        <GroceryItem 
+                            key={`${index}-${itemName}`} 
+                            name={itemName} 
+                            data={isObject ? item : null} 
+                            rawItem={item} 
+                            triggerDelete={handleDelete}
+                        />
+                    );
+                })}
+            </ul>
 			<button 
 				className = 'secret-btn'
 				onClick ={triggerSecret}

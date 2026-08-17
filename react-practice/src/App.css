@@ -1,5 +1,5 @@
 * {
-  box-sizing : border-box;
+  box-sizing: border-box;
   font-family: 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
 }
 
@@ -22,51 +22,69 @@ button {
   border: none;
   padding: 10px 16px;
   cursor: pointer;
-  transition: background-color 0.2s ease;
+  border-radius: 8px; /* Standardized radius */
+  transition: background-color 0.2s ease, transform 0.1s ease;
+  font-weight: 600;
 }
 
-button:hover{
-  background-color: #2dfa31;
+button:active {
+  transform: scale(0.98); /* Satisfying click effect */
 }
 
 button:disabled {
-  background-color: #cccccc;
+  background-color: #cccccc !important;
   cursor: not-allowed;
-}
-.surprise-btn {
-  width: 100%;
-  padding: 12px;
-  color: white;
-  border-radius: 8px;
-  font-size: 16px;
-  margin-bottom: 20px;
+  transform: none;
 }
 
-.surprise-btn:hover{
-  width: 100%;
-  background-color: #ac2cfc;
-}
-
+/* --- Form Styles --- */
 .add-form {
   display: flex;
   gap: 10px;
   margin-bottom: 20px;
 }
 
-.input-container{
-  flex: 1;
-  flex-direction: column;
-}
-
 .add-input {
   flex: 1;
-  padding: 10px;
+  padding: 12px;
   width: 100%;
   border: 1px solid #cccccc;
   border-radius: 8px;
   font-size: 16px;
 }
 
+/* --- Top Action Buttons --- */
+.button-group {
+  display: flex;
+  gap: 10px;
+  margin-bottom: 25px;
+}
+
+.surprise-btn {
+  flex: 1;
+  padding: 12px;
+  color: white;
+  background-color: #8b5cf6; /* Modern purple */
+  font-size: 16px;
+}
+
+.surprise-btn:hover:not(:disabled) {
+  background-color: #7c3aed;
+}
+
+.fetch-btn {
+  flex: 1;
+  padding: 12px;
+  color: white;
+  background-color: #10b981; /* Modern green */
+  font-size: 16px;
+}
+
+.fetch-btn:hover:not(:disabled) {
+  background-color: #059669;
+}
+
+/* --- Grocery List Styles --- */
 .grocery-list {
   list-style: none;
   padding: 0;
@@ -74,30 +92,111 @@ button:disabled {
 
 .grocery-item {
   display: flex;
-  justify-content: space-between;
-  background-color: #f8f9fa;
-  align-items: center;
-  padding: 12px 16px;
-  margin-bottom: 10px;
+  flex-direction: column; /* Stacks the content vertically */
+  background-color: #ffffff;
+  padding: 16px;
+  margin-bottom: 12px;
   border-radius: 8px;
-  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.5);
+  border: 1px solid #e5e7eb;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
   word-break: break-word;
 }
 
+.item-main {
+  margin-bottom: 12px;
+}
+
+.item-name {
+  font-size: 1.1em;
+  font-weight: bold;
+  color: #1f2937;
+}
+
+.item-quantity {
+  font-weight: normal;
+  color: #6b7280;
+  margin-left: 8px;
+  font-size: 0.9em;
+}
+
+/* --- Rich AI Data Styles --- */
+.item-details {
+  font-size: 0.95em;
+  color: #4b5563;
+  margin-top: 8px;
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 8px;
+}
+
+.price-sale {
+  color: #dc2626;
+  font-weight: 700;
+  font-size: 1.1em;
+}
+
+.price-original {
+  text-decoration: line-through;
+  color: #9ca3af;
+  margin-left: 6px;
+}
+
+.badge {
+  font-size: 0.75em;
+  font-weight: bold;
+  padding: 2px 6px;
+  border-radius: 4px;
+}
+
+.badge-crv {
+  color: #0288d1;
+  border: 1px solid #0288d1;
+  background-color: #e0f2fe;
+}
+
+.badge-tax {
+  color: #ea580c;
+  border: 1px solid #ea580c;
+  background-color: #ffedd5;
+}
+
+/* --- Bottom Item Action Buttons --- */
+.item-actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 10px;
+  border-top: 1px solid #f3f4f6;
+  padding-top: 12px;
+}
+
 .plus-btn {
-  margin-left: auto;
-  white-space: nowrap;
-  margin-right: 10px;
+  background-color: #e0f2fe;
+  color: #0288d1;
+}
+
+.plus-btn:hover {
+  background-color: #bae6fd;
 }
 
 .delete-btn {
-  white-space: nowrap;
+  background-color: #fee2e2;
+  color: #ef4444;
 }
 
-.delete-btn:hover{
-  background-color: #f61f1f;
+.delete-btn:hover {
+  background-color: #fecaca;
 }
 
-.plus-btn:hover{
-  background-color: #1594f5;
+/* --- Secret Button --- */
+.secret-btn {
+  background: transparent;
+  color: #d1d5db;
+  margin-top: 30px;
+  width: 100%;
+}
+
+.secret-btn:hover {
+  color: #ef4444;
+  background: transparent;
 }

@@ -17,11 +17,11 @@ function Fetch99Ranch(props) {
             
                 const validItems = responseData.data.filter(item => item.english_name != null);
 
-                props.updateGroceries([validItems])
+                props.updateGroceries(validItems)
             }
         }).catch(error => {
             console.error("fetch error: ", error);
-        }).fianlly(() => {
+        }).finally(() => {
             setIsLoading(false);
         });
     }
@@ -37,4 +37,4 @@ function Fetch99Ranch(props) {
     )
 }
 
-export default handleFetch99Ranch;
+export default Fetch99Ranch;
