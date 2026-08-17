@@ -5,8 +5,22 @@ app = FastAPI()
 
 @app.get("/")
 def root():
-    print("starting to fetch data...")
-    all_products = extract_prices(scrape_ad_images())
-    print("Data fetch complete-------")
-    return {"data" : all_products}
+    {"Hello" : "world"}
 
+@app.get("/api/prices")
+def get_grocery_prices():
+    print("API called: Starting scraping process...")
+
+    image_paths = scrape_ad_images()
+
+    print("scraping complete...")
+
+    all_products = extract_prices(image_paths)
+    
+    print("Data fetch complete-------")
+
+    return {
+        "status" : "success",
+        "total_items" : len(all_products),
+        "data" : all_products
+    }
