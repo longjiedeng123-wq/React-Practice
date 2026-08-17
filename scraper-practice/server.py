@@ -7,13 +7,12 @@ from ai_extractor import extract_prices
 app = FastAPI()
 
 origins = [
-    "http://localhost:5173",
-    "http://127.0.0.1:5173"
+    "http://localhost:5173/"
 ]
 
 app.add_middleware(
     CORSMiddleware,
-    allow_origin=origins,
+    allow_origins=origins,
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"]
@@ -21,7 +20,7 @@ app.add_middleware(
 
 @app.get("/")
 def root():
-    {"Hello" : "world"}
+    return {"Hello" : "world"}
 
 @app.get("/api/prices")
 def get_grocery_prices():
