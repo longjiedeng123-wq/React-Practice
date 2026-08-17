@@ -2,6 +2,7 @@ import './App.css';
 import { useState, useEffect} from 'react';
 import AddForm from './AddForm.jsx'; 
 import GroceryItem from './GroceryItem.jsx';
+import fetch99Ranch from './Fetch99Ranch.jsx';
 
 function App() { 
 	const [groceries, setGroceries] = useState(
@@ -18,7 +19,8 @@ function App() {
 		"Bro, you already typed this. Are we stuck in a time loop?",
 		"The grocery list gods reject your duplicate offering.",
 		"Deja vu! I just saw this item a second ago.",
-		"Task failed successfully: you found an item that already exists!"];
+		"Task failed successfully: you found an item that already exists!"
+	];
 	useEffect(() => {
 		localStorage.setItem("groceries-list", JSON.stringify(groceries));
 	}, [groceries]);
@@ -60,6 +62,9 @@ function App() {
 	function triggerSecret() {
 		window.open("https://www.youtube.com/watch?v=G8iEMVr7GFg", "-blank");
 	}
+	function handleFetchedItems(items) {
+		setGroceries([...groceries, ...items]);
+	}
 	return ( 
 		<div className = "app-container"> 
 			<h1 className = "app-title">
@@ -70,8 +75,9 @@ function App() {
 				className = "surprise-btn"
 				onClick = {handleFetchRandom} 
 				disabled={isLoading}>
-					{isLoading ? "Fetching ..." : "Suprise Me!"}
+					{isLoading ? "Fetching ..." : "Surprise Me!"}
 			</button>
+			<Fetch99Ranch updateGroceries={handleFetchedItems} />
 			<ul className = "grocery-list">
 				{groceries.map(item => <GroceryItem key = {item} name = {item} triggerDelete = {handleDelete}/>)}
 			</ul>
