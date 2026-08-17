@@ -18,12 +18,23 @@ app.add_middleware(
     allow_headers=["*"]
 )
 
+cached_grocery_data = None
+
 @app.get("/")
 def root():
     return {"Hello" : "world"}
 
 @app.get("/api/prices")
 def get_grocery_prices():
+    global cached_grocery_data
+
+    if cached_grocery_data is not None:
+        print("Returning stored data, no scraping is needed")
+        return {
+            "status" : "success",
+            "total_items" : len(cached_grocery_data),
+            "data" : cached_grocery_data
+        }
     print("API called: Starting scraping process...")
 
     image_paths = scrape_ad_images()
@@ -34,6 +45,8 @@ def get_grocery_prices():
     
     print("Data fetch complete-------")
 
+    cached_grocery_data = all_products
+    
     return {
         "status" : "success",
         "total_items" : len(all_products),
