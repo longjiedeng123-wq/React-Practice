@@ -37,23 +37,23 @@ def extract_prices(image_paths):
 
     If any string attribute is missing from the image for a specific item, return the JSON value `null` (not the string "null")."""
 
-    for image_path in image_paths:
-        try:
-            ad_image = Image.open(image_path)
+    #for image_path in image_paths:
+    try:
+        ad_image = Image.open(image_paths[0])
 
-            print("AI searching...")
-            response = client.models.generate_content(
-                model=model_id,
-                contents=[prompt, ad_image]
-            )
-            clean_text = response.text.replace("```json", "").replace("```", "").strip()
+        print("AI searching...")
+        response = client.models.generate_content(
+            model=model_id,
+            contents=[prompt, ad_image]
+        )
+        clean_text = response.text.replace("```json", "").replace("```", "").strip()
 
-            all_products.extend(json.loads(clean_text))
+        all_products.extend(json.loads(clean_text))
 
-            print("-------Each Response--------")
-            print(response.text)
-        except Exception as e:
-            print(f"Failure with Error: {e}")
+        print("-------Each Response--------")
+        print(response.text)
+    except Exception as e:
+        print(f"Failure with Error: {e}")
     print("-------final product--------")
     print(all_products)
     return all_products
