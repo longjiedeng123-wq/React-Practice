@@ -7,7 +7,9 @@ from ai_extractor import extract_prices
 app = FastAPI()
 
 origins = [
-    "http://localhost:5173/"
+    "http://localhost:5173",
+    "http://127.0.0.1:5173",
+    "https://linkong666.netlify.app"
 ]
 
 app.add_middleware(
@@ -46,7 +48,7 @@ def get_grocery_prices():
     print("Data fetch complete-------")
 
     cached_grocery_data = all_products
-    
+
     return {
         "status" : "success",
         "total_items" : len(all_products),

@@ -1,13 +1,17 @@
 import './App.css';
-import { useState, useEffect} from 'react';
+
 import AddForm from './AddForm.jsx'; 
 import GroceryItem from './GroceryItem.jsx';
 import Fetch99Ranch from './Fetch99Ranch.jsx';
 
+import { useState, useEffect} from 'react';
+
 function App() { 
 	const [groceries, setGroceries] = useState(
 		JSON.parse(localStorage.getItem("groceries-list")) || ["apple", "banana", "orange"]);
+
 	const [isLoading, setIsLoading] = useState(false);
+
 	const errorMessageBank = [
 		"Space doesn't work anymore, no~", 
 		"Nice try, but you can't add duplicates!",
@@ -21,19 +25,26 @@ function App() {
 		"Deja vu! I just saw this item a second ago.",
 		"Task failed successfully: you found an item that already exists!"
 	];
+
 	useEffect(() => {
 		localStorage.setItem("groceries-list", JSON.stringify(groceries));
 	}, [groceries]);
+	function isValidObject(item) {
+		return typeof item === 'object' && item !== null;
+	}
+	function extractItemName(item) {
+		return isValidObject(item) ? item.english_name : item;
+	}
 	function handleAdd(inputValue, errorMessage) {
 		const WHITELIST_REGEX = /[^a-zA-Z0-9 ]/g;
 		if (WHITELIST_REGEX.test(inputValue)) {
       		inputValue = inputValue.replace(WHITELIST_REGEX, "");
     	}
 		const cleanedInput = inputValue.trim().toLowerCase().replace(WHITELIST_REGEX, '').replace(/\s+/g, ' ');
-		// Update duplicate check to safely handle both strings and objects
+		
         const isDuplicate = groceries.some(item => {
-            // If it's an object, grab the english_name. Otherwise, just use the string.
-            const itemName = typeof item === 'object' && item !== null ? item.english_name : item;
+            
+            const itemName = extractItemName(item);
             
             return itemName.trim().toLowerCase() === cleanedInput;
         });
@@ -47,9 +58,11 @@ function App() {
 		setGroceries([...groceries, cleanedInput]);
 		return "";
 	}
+
 	function handleDelete(itemToDelete) {
 		setGroceries(groceries.filter(item => item !== itemToDelete));
 	}
+
 	function handleFetchRandom() {
 		setIsLoading(true);
 		fetch("https://www.themealdb.com/api/json/v1/1/random.php")
@@ -71,6 +84,7 @@ function App() {
 	function handleFetchedItems(items) {
 		setGroceries([...groceries, ...items]);
 	}
+	
 	function removeAllItem() {
 		setGroceries([]);
 	}
@@ -99,8 +113,7 @@ function App() {
 			
 			<ul className="grocery-list">
                 {groceries.map((item, index) => {
-                    const isObject = typeof item === 'object' && item !== null;
-                    const itemName = isObject ? item.english_name : item;
+                    const itemName = extractItemName(item);
                     
                     return (
                         <GroceryItem 

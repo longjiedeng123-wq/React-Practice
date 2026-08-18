@@ -8,7 +8,7 @@ load_dotenv()
 
 client = genai.Client()
 
-model_id = 'gemini-3.5-flash'
+model_id = 'gemini-3.6-flash'
 
 def extract_prices(image_paths):
     all_products = []
@@ -49,11 +49,11 @@ def extract_prices(image_paths):
             clean_text = response.text.replace("```json", "").replace("```", "").strip()
 
             all_products.extend(json.loads(clean_text))
-            
+
             print("-------Each Response--------")
             print(response.text)
         except Exception as e:
-            print("Failure with Error: {e}")
+            print(f"Failure with Error: {e}")
     print("-------final product--------")
     print(all_products)
     return all_products
