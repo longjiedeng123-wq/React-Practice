@@ -119,7 +119,7 @@ function App() {
                         <GroceryItem 
                             key={`${index}-${itemName}`} 
                             name={itemName} 
-                            data={isObject ? item : null} 
+                            data={isValidObject(item) ? item : null} 
                             rawItem={item} 
                             triggerDelete={handleDelete}
                         />
