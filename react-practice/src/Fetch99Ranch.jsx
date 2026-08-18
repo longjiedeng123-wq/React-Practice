@@ -1,6 +1,6 @@
 import { useState } from 'react';
 
-function Fetch99Ranch(props) {
+function Fetch99Ranch({updateGroceries}) {
     const [isLoading, setIsLoading] = useState(false);
 
     function fetchGroceryData () {
@@ -17,7 +17,7 @@ function Fetch99Ranch(props) {
             
                 const validItems = responseData.data.filter(item => item.english_name != null);
 
-                props.updateGroceries(validItems)
+                updateGroceries(validItems)
             }
         }).catch(error => {
             console.error("fetch error: ", error);
