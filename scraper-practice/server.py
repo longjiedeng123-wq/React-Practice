@@ -4,6 +4,16 @@ from fastapi.middleware.cors import CORSMiddleware
 from scraper import scrape_ad_images
 from ai_extractor import extract_prices
 
+import os
+from dotenv import load_dotenv
+from supabase import create_client, Client
+
+load_dotenv()
+
+url : str = os.environ.get("SUPABASE_URL")
+key : str = os.environ.get("SUPABASE_KEY")
+supabase : Client = create_client(url, key)
+
 app = FastAPI()
 
 origins = [
