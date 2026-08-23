@@ -31,6 +31,15 @@ app.add_middleware(
 )
 
 cached_grocery_data = None
+def get_or_create_store(store_name: str) -> str:
+    response = supabase.table("stores").select("id").eq("name", store_name).execute()
+
+    if response.data:
+        return response.data[0]["id"]
+
+    new_store = supabase.table("stores").insert({"name": store_name}).execute()
+    return new_store.data[0]["id"]
+
 
 @app.get("/")
 def root():
