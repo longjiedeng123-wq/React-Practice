@@ -91,6 +91,11 @@ def get_grocery_prices():
     
     print("Data fetch complete-------")
 
+    store_id = get_or_create_store("99 Ranch")
+    save_grocery_items(store_id, all_products)
+    
+    print("Data successfully saved to PostgreSQL database!-------")
+
     cached_grocery_data = all_products
 
     return {
