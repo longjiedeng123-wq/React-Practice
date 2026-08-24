@@ -10,8 +10,8 @@ from supabase import create_client, Client
 
 load_dotenv()
 
-url : str = os.environ.get("SUPABASE_URL")
-key : str = os.environ.get("SUPABASE_KEY")
+url : str = os.environ.get("SUPABASE_URL", "")
+key : str = os.environ.get("SUPABASE_KEY", "")
 supabase : Client = create_client(url, key)
 
 app = FastAPI()
@@ -35,10 +35,10 @@ def get_or_create_store(store_name: str) -> str:
     response = supabase.table("stores").select("id").eq("name", store_name).execute()
 
     if response.data:
-        return response.data[0]["id"]
+        return response.data[0]["id"] # type: ignore
 
     new_store = supabase.table("stores").insert({"name": store_name}).execute()
-    return new_store.data[0]["id"]
+    return new_store.data[0]["id"] # type: ignore
 
 def save_grocery_items(store_id: str, extracted_items: list):
     for item in extracted_items:
@@ -48,7 +48,7 @@ def save_grocery_items(store_id: str, extracted_items: list):
         product_response = supabase.table("products").select("id").eq("store_id", store_id).eq("english_name", item["english_name"]).execute()
 
         if product_response.data:
-            product_id = product_response.data[0]["id"]
+            product_id = product_response.data[0]["id"] # type: ignore
         else:
             new_product = supabase.table("products").insert({
                 "store_id": store_id,
@@ -56,7 +56,7 @@ def save_grocery_items(store_id: str, extracted_items: list):
                 "chinese_name": item.get("chinese_name"),
                 "base_unit_type": item.get("unit")
             }).execute()
-            product_id = new_product.data[0]["id"]
+            product_id = new_product.data[0]["id"] # type: ignore
 
         supabase.table("price_history").insert({
             "product_id": product_id,
@@ -66,6 +66,7 @@ def save_grocery_items(store_id: str, extracted_items: list):
             "taxable": item.get("taxable"),
             "has_crv": item.get("has_crv")
         }).execute()
+
 @app.get("/")
 def root():
     return {"Hello" : "world"}

@@ -46,7 +46,7 @@ def extract_prices(image_paths):
             model=model_id,
             contents=[prompt, ad_image]
         )
-        clean_text = response.text.replace("```json", "").replace("```", "").strip()
+        clean_text = str(response.text).replace("```json", "").replace("```", "").strip()
 
         all_products.extend(json.loads(clean_text))
 
