@@ -6,7 +6,7 @@ function Fetch99Ranch({updateGroceries}) {
     function fetchGroceryData () {
         setIsLoading(true);
 
-        fetch(import.meta.env.VITE_API_URL || "http://127.0.0.1:8000/api/products")
+        fetch(import.meta.env.VITE_API_URL || "http://127.0.0.1:8000/api/prices")
         .then(response => {
             if(!response.ok) {
                 throw new Error("Network response was not ok");
