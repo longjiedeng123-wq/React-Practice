@@ -107,12 +107,13 @@ def get_grocery_prices():
 
 @app.get('/api/products')
 def get_saved_products():
+
     response = supabase.table("products").select(
         "english_name, chinese_name, base_unit_type, price_history(original_price, discount_price, valid_dates, taxable, has_crv)"
     ).execute()
 
     formatted_products = []
-
+    print(f"~~~~~~~~~~~response DATA: {response.data} ~~~~~~~~~~~")
     for product in response.data:
         p : dict = product # type: ignore
         history : list = p.get("price_history", [])
