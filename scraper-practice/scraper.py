@@ -5,23 +5,22 @@ def scrape_ad_images():
     image_paths = []
 
     with sync_playwright() as p:
-        browser = p.chromium.launch(headless=True)
+        browser = p.chromium.launch(headless=False)
         page = browser.new_page()
-        page.goto("https://h5.awsprod.99ranch.com/stores/ad/1009")
+        page.goto("https://www.99ranch.com/stores/promotions/1259")
         
-        image_elements = page.locator("img[alt='poster']").all()
+        image_elements = page.locator("img[alt='Zoomable']").all()
 
         count = 1
 
         for image_element in image_elements:
 
-            partial_url = image_element.get_attribute("src")
+            full_url = image_element.get_attribute("src")
 
-            if not partial_url:
+            if not full_url:
                 print("This Poster not found")
                 continue
 
-            full_url = "https://h5.awsprod.99ranch.com" + partial_url
             print("Downloading from:", full_url)
             
             response = requests.get(full_url)
