@@ -105,3 +105,32 @@ def get_grocery_prices():
         "data" : all_products
     }
 
+@app.get('/api/products')
+def get_saved_products():
+    response = supabase.table("products").select(
+        "english_name, chinese_name, base_unit_type, price_history(original_price, discount_price, valid_dates, taxable, has_crv)"
+    ).execute()
+
+    formatted_products = []
+
+    for product in response.data:
+        p : dict = product # type: ignore
+        history : list = p.get("price_history", [])
+
+        latest_price : dict = history[0] if history else {}
+
+        formatted_products.append({
+            "english_name": p.get("english_name"),
+            "chinese_name": p.get("chinese_name"),
+            "unit": p.get("base_unit_type"),
+            "original_price": latest_price.get("original_price"),
+            "discount_price": latest_price.get("discount_price"),
+            "taxable": latest_price.get("taxable"),
+            "has_crv": latest_price.get("has_crv")
+        })
+
+    return {
+        "status": "success",
+        "total_items": len(formatted_products),
+        "data": formatted_products
+    }
