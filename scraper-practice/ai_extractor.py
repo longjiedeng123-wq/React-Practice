@@ -1,5 +1,6 @@
 import os
 import json
+import time
 from dotenv import load_dotenv
 from google import genai
 from PIL import Image
@@ -8,7 +9,12 @@ load_dotenv()
 
 client = genai.Client()
 
-model_id = 'gemini-3.6-flash'
+IMAGE_MODELS = [
+    'gemini-3.7-flash',
+    'gemini-3.6-flash',
+    'gemini-3.5-flash',
+    'gemini-2.5-flash'
+]
 
 def extract_prices(image_paths):
     all_products = []
@@ -37,23 +43,45 @@ def extract_prices(image_paths):
 
     If any string attribute is missing from the image for a specific item, return the JSON value `null` (not the string "null")."""
 
-    #for image_path in image_paths:
-    try:
-        ad_image = Image.open(image_paths[0])
+    
+    for image_path in image_paths:
+        ad_image = Image.open(image_path)
+        success = False
 
-        print("AI searching...")
-        response = client.models.generate_content(
-            model=model_id,
-            contents=[prompt, ad_image]
-        )
-        clean_text = str(response.text).replace("```json", "").replace("```", "").strip()
+        for model in IMAGE_MODELS:
+            if success:
+                break
+            for attempt in range(1,4):
+                try:
+                    
+                    print("AI searching...")
 
-        all_products.extend(json.loads(clean_text))
+                    response = client.models.generate_content(
+                        model=model,
+                        contents=[prompt, ad_image]
+                    )
+                    clean_text = str(response.text).replace("```json", "").replace("```", "").strip()
 
-        print("-------Each Response--------")
-        print(response.text)
-    except Exception as e:
-        print(f"Failure with Error: {e}")
+                    all_products.extend(json.loads(clean_text))
+                    
+                    print("-------Each Response--------")
+                    print(response.text)
+                    success = True
+                    time.sleep(4)
+                    break
+                except Exception as e:
+
+                    error_msg = str(e).lower()
+                    is_temporary = any(term in error_msg for term in ["503", "unavailable", "demand", "429", "quota", "exhausted"])
+                    if is_temporary:
+                        print(f"~~~~{model}: with {e}~~~~")
+                        time.sleep(3 * attempt)
+                    else:
+                        print(f"Non-recoverable error on {model_id}: {e}")
+                        break
+        
+
+
     print("-------final product--------")
     print(all_products)
     return all_products
