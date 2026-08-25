@@ -36,35 +36,49 @@ def scrape_ad_images():
 
         enter_zip_code(page)
 
-        image_elements = page.locator("img[alt='poster']").all()
-
+        tabs = page.locator("img[alt='poster']").all()
+        downloaded_urls = set() 
         count = 1
-        
+        last_url = ""
 
-        for image_element in image_elements:
+        for tab in tabs:
+            try:
+                tab.evaluate("node => node.click()")
+                
+                full_url = None
+                
+                for _ in range(10):
+                    page.wait_for_timeout(500)
+                    main_image = page.locator("img[alt='Zoomable']").first
+                    temp_url = main_image.get_attribute("src")
+                    
+                    if temp_url and not temp_url.startswith("data:image") and temp_url != last_url:
+                        full_url = temp_url
+                        last_url = full_url 
+                        break 
+                
+                if not full_url:
+                    continue
 
-            partial_url : str = image_element.get_attribute("src") # type: ignore
+                if full_url.startswith("/"):
+                    full_url = "https://www.99ranch.com" + full_url
 
-            if not partial_url.startswith("/"):
+                if full_url in downloaded_urls:
+                    continue
 
-                print(f"~~~~~~~~~~~~This Poster not found, skipping to next one{partial_url}~~~~~~~~~")
-                continue
+                downloaded_urls.add(full_url)
+                
+                response = requests.get(full_url)
+                image_name = f"weekly_ad_{count}.jpg"
 
-            full_url = "https://www.99ranch.com"+ partial_url
+                with open(image_name, "wb") as file:
+                    file.write(response.content)
 
-            print("Downloading from:", full_url)
-            
-            response = requests.get(full_url)
-            image_name = f"weekly_ad_{count}.jpg"
-
-            with open(image_name, "wb") as file:
-                file.write(response.content)
-
-            image_paths.append(image_name)
-
-            print("Image downloaded successfully!")
-
-            count += 1
+                image_paths.append(image_name)
+                count += 1
+                
+            except Exception as e:
+                print(f"Skipping a tab due to error: {e}")
         
         browser.close()
 
