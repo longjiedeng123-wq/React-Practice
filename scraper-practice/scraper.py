@@ -1,36 +1,40 @@
 from playwright.sync_api import sync_playwright
 import requests
 
+def enter_zip_code(page) -> None:
+    try:
+        print("Checking for location modal...")
+        
+        # Target the exact placeholder text you found in the DOM!
+        zip_input = page.locator("input[placeholder='Enter zip code']")
+        
+        # Wait up to 5 seconds for the modal to pop up
+        zip_input.wait_for(timeout=5000)
+        
+        # Fill in the Tustin zip code
+        zip_input.fill("92780")
+        
+        # Instead of clicking the button, hitting "Enter" is often faster and bypasses disabled states
+        zip_input.press("Enter")
+        
+        print("Zip code entered automatically!")
+        
+        # Wait 2 seconds for the website to unlock and load the real images
+        page.wait_for_timeout(2000)
+        
+    except Exception as e:
+        print(f"Error happening during zip input: {e}")
+
 def scrape_ad_images():
     image_paths = []
+    Link_99Ranch = "https://www.99ranch.com/stores/promotions/1259"
 
     with sync_playwright() as p:
         browser = p.chromium.launch(headless=False)
         page = browser.new_page()
-        page.goto("https://www.99ranch.com/stores/promotions/1259")
+        page.goto(Link_99Ranch)
 
-        try:
-            print("Checking for location modal...")
-            
-            # Target the exact placeholder text you found in the DOM!
-            zip_input = page.locator("input[placeholder='Enter zip code']")
-            
-            # Wait up to 5 seconds for the modal to pop up
-            zip_input.wait_for(timeout=5000)
-            
-            # Fill in the Tustin zip code
-            zip_input.fill("92780")
-            
-            # Instead of clicking the button, hitting "Enter" is often faster and bypasses disabled states
-            zip_input.press("Enter")
-            
-            print("Zip code entered automatically!")
-            
-            # Wait 2 seconds for the website to unlock and load the real images
-            page.wait_for_timeout(2000)
-            
-        except Exception:
-            print("No location modal detected within 5 seconds. Proceeding...")
+        enter_zip_code(page)
 
         image_elements = page.locator("img[alt='poster']").all()
 
