@@ -7,7 +7,7 @@ function Fetch99Ranch({updateGroceries}) {
         setIsLoading(true);
         setStatusMessage("Starting AI background scraper...");
 
-        fetch(import.meta.env.VITE_API_URL || "http://127.0.0.1:8000/api/prices")
+        fetch(import.meta.env.SCRAPING || "http://127.0.0.1:8000/api/prices")
         .then(response => response.json())
         .then(data => {
             setStatusMessage(data.message); 
@@ -25,7 +25,7 @@ function Fetch99Ranch({updateGroceries}) {
         setIsLoading(true);
         setStatusMessage("Fetching database...");
 
-        fetch("http://127.0.0.1:8000/api/products")
+        fetch(import.meta.env.DATABASE || "http://127.0.0.1:8000/api/products")
         .then(response => response.json())
         .then(responseData => {
             if (responseData.status === "success") {
