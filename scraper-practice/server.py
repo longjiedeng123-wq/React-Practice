@@ -67,6 +67,7 @@ def save_grocery_items(store_id: str, extracted_items: list):
             "taxable": item.get("taxable"),
             "has_crv": item.get("has_crv")
         }).execute()
+
 async def run_scraping_pipeline():
     image_paths = await scrape_ad_images()
 
@@ -81,29 +82,16 @@ def root():
     return {"Hello" : "world"}
 
 @app.get("/api/prices")
-async def get_grocery_prices():
+async def get_grocery_prices(background_tasks: BackgroundTasks):
     
     print("API called: Starting scraping process...")
 
-    image_paths = await scrape_ad_images()
-
-    print("scraping complete...")
-
-    all_products = extract_prices(image_paths)
-    
-    print("Data fetch complete-------")
-
-    store_id = get_or_create_store("99 Ranch")
-    save_grocery_items(store_id, all_products)
-    
-    print("Data successfully saved to PostgreSQL database!-------")
+    background_tasks.add_task(run_scraping_pipeline)
 
     
-
     return {
         "status" : "success",
-        "total_items" : len(all_products),
-        "data" : all_products
+        "message" : "Scraping started in the background. Data will be available soon."
     }
 
 @app.get('/api/products')
