@@ -68,6 +68,7 @@ def save_grocery_items(store_id: str, extracted_items: list):
 async def run_scraping_pipeline():
     image_paths = await scrape_ad_images()
 
+    print("~~~~~~~~scrape success~~~~~~~")
     all_products = await extract_prices(image_paths)
 
     store_id = await asyncio.to_thread(get_or_create_store, "99 Ranch")
