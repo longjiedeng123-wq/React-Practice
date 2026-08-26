@@ -72,11 +72,11 @@ def root():
     return {"Hello" : "world"}
 
 @app.get("/api/prices")
-def get_grocery_prices():
+async def get_grocery_prices():
     
     print("API called: Starting scraping process...")
 
-    image_paths = scrape_ad_images()
+    image_paths = await scrape_ad_images()
 
     print("scraping complete...")
 
