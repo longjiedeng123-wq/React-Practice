@@ -1,5 +1,6 @@
-from fastapi import FastAPI
+from fastapi import FastAPI, BackgroundTasks
 from fastapi.middleware.cors import CORSMiddleware
+import asyncio
 
 from scraper import scrape_ad_images
 from ai_extractor import extract_prices
@@ -66,6 +67,14 @@ def save_grocery_items(store_id: str, extracted_items: list):
             "taxable": item.get("taxable"),
             "has_crv": item.get("has_crv")
         }).execute()
+async def run_scraping_pipeline():
+    image_paths = await scrape_ad_images()
+
+    all_products = await extract_prices(image_paths)
+
+    store_id = await asyncio.to_thread(get_or_create_store, "99 Ranch")
+    await asyncio.to_thread(save_grocery_items, store_id, all_products)
+
 
 @app.get("/")
 def root():

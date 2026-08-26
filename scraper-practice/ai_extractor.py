@@ -1,6 +1,6 @@
 import os
 import json
-import time
+import asyncio
 from dotenv import load_dotenv
 from google import genai
 from PIL import Image
@@ -16,7 +16,7 @@ IMAGE_MODELS = [
     'gemini-2.5-flash'
 ]
 
-def extract_prices(image_paths):
+async def extract_prices(image_paths):
     all_products = []
     print("Loading images...")
     prompt = """You are a highly precise data extraction bot analyzing grocery store weekly ads. 
@@ -56,10 +56,10 @@ def extract_prices(image_paths):
                     
                     print("AI searching...")
 
-                    response = client.models.generate_content(
+                    response = await client.aio.models.generate_content(
                         model=model,
                         contents=[prompt, ad_image]
-                    )
+                    ) 
                     clean_text = str(response.text).replace("```json", "").replace("```", "").strip()
 
                     all_products.extend(json.loads(clean_text))
@@ -67,7 +67,7 @@ def extract_prices(image_paths):
                     print("-------Each Response--------")
                     print(response.text)
                     success = True
-                    time.sleep(4)
+                    await asyncio.sleep(4)
                     break
                 except Exception as e:
 
@@ -75,9 +75,9 @@ def extract_prices(image_paths):
                     is_temporary = any(term in error_msg for term in ["503", "unavailable", "demand", "429", "quota", "exhausted"])
                     if is_temporary:
                         print(f"~~~~{model}: with {e}~~~~")
-                        time.sleep(3 * attempt)
+                        await asyncio.sleep(3 * attempt)
                     else:
-                        print(f"Non-recoverable error on {model_id}: {e}")
+                        print(f"Non-recoverable error on {model}: {e}")
                         break
         
 
