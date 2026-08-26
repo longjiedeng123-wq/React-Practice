@@ -17,11 +17,8 @@ supabase : Client = create_client(url, key)
 
 app = FastAPI()
 
-origins = [
-    "http://localhost:5173",
-    "http://127.0.0.1:5173",
-    "https://linkong666.netlify.app"
-]
+frontend_urls_str = os.environ.get("FRONTEND_URLS", "")
+origins = frontend_urls_str.split(",") if frontend_urls_str else []
 
 app.add_middleware(
     CORSMiddleware,
