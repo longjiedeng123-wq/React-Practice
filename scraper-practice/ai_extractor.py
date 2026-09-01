@@ -4,6 +4,8 @@ import asyncio
 from dotenv import load_dotenv
 from google import genai
 from PIL import Image
+from pydantic import BaseModel, Field
+from typing import List, Optional
 
 load_dotenv()
 
@@ -16,32 +18,25 @@ IMAGE_MODELS = [
     'gemini-2.5-flash'
 ]
 
+class GroceryItemSchema(BaseModel):
+    english_name: str = Field(description="The English name of the product.")
+    chinese_name: Optional[str] = Field(None, description="The Chinese name. Null if missing.")
+    original_price: Optional[float] = Field(None, description="Numerical original price.")
+    discount_price: Optional[float] = Field(None, description="Numerical sale price.")
+    unit: Optional[str] = Field(None, description="Base unit of sale (e.g., EA, PK, LB).")
+    quantity: Optional[str] = Field(None, description="Size/weight/volume.")
+    valid_dates: Optional[str] = Field(None, description="Date range valid for this item.")
+    taxable: bool = Field(False, description="True ONLY if +TX is present.")
+    has_crv: bool = Field(False, description="True ONLY if +CRV is present.")
+
+    
 async def extract_prices(image_paths):
     all_products = []
     print("Loading images...")
-    prompt = """You are a highly precise data extraction bot analyzing grocery store weekly ads. 
-    Extract the products, their prices, and their associated details. 
-    
-    CRITICAL INSTRUCTIONS FOR CONTEXT:
-    1. Observe date headers (e.g., "08/07/26 - 08/20/26" or "08/14/26 - 08/20/26"). Apply the correct date range to the items directly below that specific banner.
-    2. Identify the package quantity usually found in the top left or near the item (e.g., "25lb", "3L", "400g", "1.15kg").
-    3. Identify if there is an original price (usually crossed out or printed smaller) and a discount/sale price (usually larger and more prominent).
-    4. If the image is a general flyer containing NO specific grocery items or prices, return an empty JSON array: []
-    
-    Return ONLY a valid JSON list of objects. Do not include any markdown formatting or extra text.
-    
-    Each object must have exactly these keys:
-    - "english_name": The English name of the product.
-    - "chinese_name": The Chinese name of the product. Return null if missing.
-    - "original_price": The numerical original price before any discount (e.g., "8.99"). Return null if there is no distinct original price shown.
-    - "discount_price": The numerical sale price (e.g., "6.99"). If only one price is shown on the item, use it here.
-    - "unit": The base unit of sale (e.g., "EA", "PK", "LB"). DO NOT include TX or CRV here. Return null if missing.
-    - "quantity": The size/weight/volume of the item (e.g., "25lb", "3L", "400g"). Return null if missing.
-    - "valid_dates": The date range valid for this item. Return null if missing.
-    - "taxable": Boolean (true or false). Set to true ONLY if "+TX" is present near the price/unit.
-    - "has_crv": Boolean (true or false). Set to true ONLY if "+CRV" is present near the price/unit.
 
-    If any string attribute is missing from the image for a specific item, return the JSON value `null` (not the string "null")."""
+    prompt = """Extract the grocery products, their prices, and details from this weekly ad. 
+    Apply the correct date range from the banners. 
+    If the image contains NO specific grocery items, return an empty list."""
 
     
     for image_path in image_paths:
@@ -55,14 +50,18 @@ async def extract_prices(image_paths):
                 try:
                     
                     print("AI searching...")
-
+                    # response in json format
                     response = await client.aio.models.generate_content(
                         model=model,
-                        contents=[prompt, ad_image]
+                        contents=[prompt, ad_image],
+                        config={
+                            "response_mime_type": "application/json",
+                            "response_schema": list[GroceryItemSchema]
+                        }
                     ) 
-                    clean_text = str(response.text).replace("```json", "").replace("```", "").strip()
+                    
 
-                    all_products.extend(json.loads(clean_text))
+                    all_products.extend(json.loads(response.text))
                     
                     print("-------Each Response--------")
                     print(response.text)
