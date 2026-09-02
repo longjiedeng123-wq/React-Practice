@@ -39,32 +39,53 @@ def get_or_create_store(store_name: str) -> str:
     return new_store.data[0]["id"] # type: ignore
 
 def save_grocery_items(store_id: str, extracted_items: list):
+    product_batch = []
+
     for item in extracted_items:
         if not item.get("english_name"):
             continue
 
-        product_response = supabase.table("products").select("id").eq("store_id", store_id).eq("english_name", item["english_name"]).execute()
+        product_batch.append({
+            "store_id": store_id,
+            "english_name": item["english_name"],
+            "chinese_name": item.get("chinese_name"),
+            "base_unit_type": item.get("unit")
+        })
 
-        if product_response.data:
-            product_id = product_response.data[0]["id"] # type: ignore
-        else:
-            new_product = supabase.table("products").insert({
-                "store_id": store_id,
-                "english_name": item["english_name"],
-                "chinese_name": item.get("chinese_name"),
-                "base_unit_type": item.get("unit")
-            }).execute()
-            product_id = new_product.data[0]["id"] # type: ignore
+        if product_batch:
+            product_response = supabase.table("products").upsert(
+                product_batch,
+                on_conflict="store_id,english_name"
+            ).execute()
 
-        supabase.table("price_history").insert({
-            "product_id": product_id,
-            "original_price": item.get("original_price"),
-            "discount_price": item.get("discount_price"),
-            "valid_dates": item.get("valid_dates"),
-            "taxable": item.get("taxable"),
-            "has_crv": item.get("has_crv")
-        }).execute()
+            print(f"Upserted {len(product_response.data)} products.")
 
+        product_id_map = {row["english_name"]: row["id"] for row in product_response.data} # type: ignore
+
+        price_batch = []
+
+        for item in extracted_items:
+            english_name = item.get("english_name")
+
+            if not english_name or english_name not in product_id_map:
+                continue
+
+            price_batch.append({
+                "product_id": product_id_map[english_name],
+                "original_price": item.get("original_price"),
+                "discount_price": item.get("discount_price"),
+                "valid_dates": item.get("valid_dates"),
+                "taxable": item.get("taxable"),
+                "has_crv": item.get("has_crv")
+            })
+
+            print(f"Prepared {len(price_batch)} price records for batch insert.")
+
+        if price_batch:
+            price_response = supabase.table("price_history").insert(price_batch).execute()
+            print(f"Inserted {len(price_response.data)} price records.")    
+
+            
 async def run_scraping_pipeline():
     image_paths = await scrape_ad_images()
 
