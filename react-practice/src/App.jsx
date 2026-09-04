@@ -33,7 +33,7 @@ function App() {
 		return typeof item === 'object' && item !== null;
 	}
 	function extractItemName(item) {
-		return isValidObject(item) ? item.english_name : item;
+		return isValidObject(item) ? (item.english_name || item.name) : item;
 	}
 	function handleAdd(inputValue, errorMessage) {
 		const WHITELIST_REGEX = /[^a-zA-Z0-9 ]/g;
@@ -82,7 +82,19 @@ function App() {
 		window.open("https://www.youtube.com/watch?v=G8iEMVr7GFg", "-blank");
 	}
 	function handleFetchedItems(items) {
-		setGroceries([...groceries, ...items]);
+		setGroceries(prevGroceries => {
+        const deduplicatedItems = items.filter(newItem => {
+            const newItemName = extractItemName(newItem).trim().toLowerCase();
+            
+            const isDuplicate = prevGroceries.some(existingItem => {
+                return extractItemName(existingItem).trim().toLowerCase() === newItemName;
+            });
+            
+            return !isDuplicate;
+        });
+
+        return [...prevGroceries, ...deduplicatedItems];
+    	});
 	}
 	
 	function removeAllItem() {

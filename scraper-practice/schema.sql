@@ -37,3 +37,27 @@ CREATE TABLE price_history (
 
 CREATE INDEX idx_price_history_product_date ON price_history (product_id, scraped_at DESC);
 CREATE INDEX idx_products_embedding ON products USING hnsw (embedding vector_cosine_ops);
+ALTER TABLE products ADD CONSTRAINT unique_store_product UNIQUE(store_id, english_name);
+
+CREATE OR REPLACE FUNCTION match_products (
+  query_embedding vector(768),
+  match_threshold float,
+  match_count int
+)
+
+RETURNS TABLE (
+    id uuid,
+    english_name text,
+    similarity float
+)
+LANGUAGE sql STABLE
+AS $$
+    SELECT
+        products.id,
+        products.english_name,
+        1 - (products.embedding <=> query_embedding) AS similarity
+    FROM products
+    WHERE 1 - (products.embedding <=> query_embedding) > match_threshold
+    ORDER BY products.embedding <=> query_embedding
+    LIMIT match_count;
+$$;
