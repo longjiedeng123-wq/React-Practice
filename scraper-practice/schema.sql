@@ -61,3 +61,7 @@ AS $$
     ORDER BY products.embedding <=> query_embedding
     LIMIT match_count;
 $$;
+
+ALTER TABLE price_history
+ADD COLUMN min_qty_required INTEGER DEFAULT 1,
+ADD COLUMN limit_qty INTEGER DEFAULT NULL;

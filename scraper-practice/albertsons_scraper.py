@@ -1,5 +1,6 @@
 import asyncio
 from playwright.async_api import async_playwright
+from sanitize_albertsons import sanitize_albertsons_flipp_item, sanitize_albertsons_j4u_item
 
 async def intercept_albertsons_ad():
     captured_payloads = []
@@ -13,12 +14,27 @@ async def intercept_albertsons_ad():
             print(f"\n✅ Intercepted Target API: {response.url}")
             try:
                 data = await response.json()
-                captured_payloads.append(data)
-                print(f"Successfully captured {len(str(data))} bytes of JSON.")
+
+                if is_flipp_api and isinstance(data, list):
+                    for raw_item in data:
+                        clean_item = sanitize_albertsons_flipp_item(raw_item)
+                        if clean_item:
+                            captured_payloads.append(clean_item)
+                    print(f"Successfully captured {len(str(data))} bytes of JSON.")
+
+                elif is_j4u_api and isinstance(data, list):
+                    for raw_item in data:
+                        clean_item = sanitize_albertsons_j4u_item(raw_item)
+                        if clean_item:
+                            sanitized_items.append(clean_item)
+                    print(f"Successfully sanitized {len(sanitized_items)} J4U items.")
+                    
                 print(f"~~~~~~~~{captured_payloads}~~~~~~~~~")
+
             except Exception as e:
                 pass # Ignore preflight or non-JSON responses
 
+    
 
     async with async_playwright() as p:
         # Launch the browser in visible mode
@@ -64,7 +80,7 @@ async def intercept_albertsons_ad():
         # Cleanup
         await browser.close()
 
-
+    return captured_payloads
     
 
 
