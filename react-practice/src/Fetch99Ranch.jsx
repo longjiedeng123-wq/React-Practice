@@ -22,6 +22,24 @@ function Fetch99Ranch({updateGroceries}) {
         });
     }
 
+    function triggerAlbertsonsScraper() {
+        setIsLoading(true);
+        setStatusMessage("Starting Albertsons background scraper...");
+
+        fetch(import.meta.env.VITE_ALBERTSONS_SCRAPING || "http://127.0.0.1:8000/api/scrape-albertsons")
+        .then(response => response.json())
+        .then(data => {
+            setStatusMessage(data.message); 
+        })
+        .catch(error => {
+            console.error("fetch error: ", error);
+            setStatusMessage("Error starting Albertsons scraper.");
+        })
+        .finally(() => {
+            setIsLoading(false);
+        });
+    }
+
     function loadSavedProducts() {
         setIsLoading(true);
         setStatusMessage("Fetching database...");
@@ -31,6 +49,7 @@ function Fetch99Ranch({updateGroceries}) {
         .then(responseData => {
             if (responseData.status === "success") {
                 const validItems = responseData.data.filter(item => item.english_name != null);
+                console.log("Database Payload:", validItems);
                 updateGroceries(validItems)
                 setStatusMessage(`Loaded ${validItems.length} items from database!`)
             }
@@ -73,6 +92,13 @@ function Fetch99Ranch({updateGroceries}) {
                 disabled={isLoading}
                 onClick={triggerScraper}>
                 Trigger 99 Ranch AI Scrape
+            </button>
+            <button 
+                className="fetch-btn"
+                style={{ backgroundColor: "#ef4444" }}
+                disabled={isLoading}
+                onClick={triggerAlbertsonsScraper}>
+                Trigger Albertsons Scrape
             </button>
             <button 
                 className="fetch-btn"

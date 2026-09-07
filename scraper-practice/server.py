@@ -213,7 +213,8 @@ async def chat_with_grocery_agent(payload: dict):
 async def run_albertsons_pipeline():
     print("Starting Albertsons scraping pipeline...")
     sanitized_items = await intercept_albertsons_ad()
-    
+
+    print(json.dumps(sanitized_items, indent=2))
     print(f"~~~~~~~~Albertsons scrape success: {len(sanitized_items)} items ~~~~~~~")
     if sanitized_items:
         store_id = await asyncio.to_thread(get_or_create_store, "Albertsons")
