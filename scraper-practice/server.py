@@ -2,7 +2,8 @@ from fastapi import FastAPI, BackgroundTasks
 from fastapi.middleware.cors import CORSMiddleware
 import asyncio
 
-from scraper import scrape_ad_images
+from ranch_scraper import scrape_ad_images
+from albertsons_scraper import intercept_albertsons_ad
 from ai_extractor import extract_prices
 
 import os
@@ -206,3 +207,9 @@ async def chat_with_grocery_agent(payload: dict):
 
     return json.loads(ai_response.text)
 
+@app.get("/api/test")
+async def test_endpoint():
+    await intercept_albertsons_ad()
+
+    return {
+        "status": "success",}

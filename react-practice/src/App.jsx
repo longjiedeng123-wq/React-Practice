@@ -100,6 +100,9 @@ function App() {
 	function removeAllItem() {
 		setGroceries([]);
 	}
+	function zipCodeSearch() {
+		fetch("http://127.0.0.1:8000/api/test");
+	}
 	return ( 
 		<div className = "app-container"> 
 			<h1 className = "app-title">
@@ -144,6 +147,9 @@ function App() {
 			>
 				Don't click me!
 			</button>
+			<button
+				onClick={zipCodeSearch}
+			>test zip code search</button>
 		</div> 
 	); 
 }
