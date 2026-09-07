@@ -56,7 +56,7 @@ async def save_grocery_items(store_id: str, extracted_items: list):
             "store_id": store_id,
             "english_name": item["english_name"],
             "chinese_name": item.get("chinese_name"),
-            "base_unit_type": item.get("unit")
+            "base_unit_type": item.get("base_unit_type") or item.get("unit")
         }) 
 
     # 1. Define a synchronous wrapper for the product upsert
@@ -86,8 +86,10 @@ async def save_grocery_items(store_id: str, extracted_items: list):
             "original_price": item.get("original_price"),
             "discount_price": item.get("discount_price"),
             "valid_dates": item.get("valid_dates"),
-            "taxable": item.get("taxable"),
-            "has_crv": item.get("has_crv")
+            "taxable": item.get("taxable", False),
+            "has_crv": item.get("has_crv", False),
+            "min_qty_required": item.get("min_qty_required", 1),
+            "limit_qty": item.get("limit_qty")
         })
 
     # 3. Define a synchronous wrapper for the price insert
@@ -207,9 +209,22 @@ async def chat_with_grocery_agent(payload: dict):
 
     return json.loads(ai_response.text)
 
-@app.get("/api/test")
-async def test_endpoint():
-    await intercept_albertsons_ad()
 
+async def run_albertsons_pipeline():
+    print("Starting Albertsons scraping pipeline...")
+    sanitized_items = await intercept_albertsons_ad()
+    
+    print(f"~~~~~~~~Albertsons scrape success: {len(sanitized_items)} items ~~~~~~~")
+    if sanitized_items:
+        store_id = await asyncio.to_thread(get_or_create_store, "Albertsons")
+        await save_grocery_items(store_id, sanitized_items)
+
+@app.get("/api/scrape-albertsons")
+async def trigger_albertsons_scrape(background_tasks: BackgroundTasks):
+    print("API called: Starting Albertsons scraping process...")
+    background_tasks.add_task(run_albertsons_pipeline)
+    
     return {
-        "status": "success",}
+        "status" : "success",
+        "message" : "Albertsons scraping started in the background."
+    }
