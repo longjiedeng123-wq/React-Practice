@@ -2,12 +2,31 @@ import asyncio
 from playwright.async_api import async_playwright
 
 async def intercept_albertsons_ad():
-    
+    captured_payloads = []
+
+    async def handle_response(response):
+        # Target the Flipp API (circulars) and J4U API (personalized offers)
+        is_flipp_api = "dam.flippenterprise.net" in response.url and "/products" in response.url
+        is_j4u_api = "offerDefinitionByOfferIds" in response.url
+        
+        if is_flipp_api or is_j4u_api:
+            print(f"\n✅ Intercepted Target API: {response.url}")
+            try:
+                data = await response.json()
+                captured_payloads.append(data)
+                print(f"Successfully captured {len(str(data))} bytes of JSON.")
+                print(f"~~~~~~~~{captured_payloads}~~~~~~~~~")
+            except Exception as e:
+                pass # Ignore preflight or non-JSON responses
+
+
     async with async_playwright() as p:
         # Launch the browser in visible mode
         browser = await p.chromium.launch(headless=False)
         page = await browser.new_page()
-        
+
+        page.on("response", handle_response)
+
         print("Navigating to Albertsons base URL...")
         await page.goto("https://www.albertsons.com/weeklyad")
         
@@ -30,6 +49,9 @@ async def intercept_albertsons_ad():
         await zip_input.wait_for(state="visible", timeout=10000)
         await zip_input.fill("92780")
         print("Submitting search...")
+
+        captured_payloads.clear()
+
         await zip_input.press("Enter")
         await page.wait_for_timeout(3000)
 
