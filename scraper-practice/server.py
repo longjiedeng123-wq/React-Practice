@@ -48,7 +48,15 @@ def get_or_create_store(store_name: str) -> str:
     return new_store.data[0]["id"] # type: ignore
 
 async def save_grocery_items(store_id: str, extracted_items: list):
-    valid_items = [item for item in extracted_items if item.get("english_name")]
+
+    unique_products = {}
+    for item in extracted_items:
+        name = item.get("english_name")
+        if name:
+            unique_products[name] = item
+
+    valid_items = list(unique_products.values())
+    
     product_batch = []
 
     for item in valid_items:
