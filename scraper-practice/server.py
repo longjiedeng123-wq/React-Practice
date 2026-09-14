@@ -206,7 +206,7 @@ async def chat_with_grocery_agent(payload: dict):
 
     # 4. Generate content without the tool
     ai_response = await ai_client.aio.models.generate_content(
-        model='gemini-3.1-flash-lite',
+        model='gemini-3.6-flash',
         contents=user_prompt,
         config={
             "system_instruction": system_instruction,
