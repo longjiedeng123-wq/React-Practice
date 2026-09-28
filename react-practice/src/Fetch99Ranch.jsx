@@ -1,13 +1,43 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 
 function Fetch99Ranch({updateGroceries}) {
     const [isLoading, setIsLoading] = useState(false);
     const [ statusMessage, setStatusMessage ] = useState("");
     const [userPrompt, setUserPrompt] = useState("");
     const [liveUrl, setLiveUrl] = useState(null);
+    const [isScrapingJobActive, setIsScrapingJobActive] = useState(false);
+    useEffect(() => {
+        let intervalId;
+        
+        // We now poll based on the job being active, not the iframe existing
+        if (isScrapingJobActive) {
+            intervalId = setInterval(() => {
+                fetch("http://127.0.0.1:8000/api/status")
+                .then(res => res.json())
+                .then(data => {
+                    if (data.status === "processing") {
+                        // Phase 2: Browser is done, AI is working
+                        setLiveUrl(null); // Drop the glass wall / iframe
+                        setStatusMessage("Browser closed. Gemini AI is extracting prices...");
+                    } else if (data.status === "idle") {
+                        // Phase 3: Everything is finished
+                        setLiveUrl(null);
+                        setIsScrapingJobActive(false); // Stop the polling loop
+                        setStatusMessage("Scrape complete! Loading new items...");
+                        loadSavedProducts();
+                    }
+                })
+                .catch(err => console.error("Polling error:", err));
+            }, 3000); 
+        }
+
+        return () => {
+            if (intervalId) clearInterval(intervalId);
+        };
+    }, [isScrapingJobActive]); // Depend on the job state, not liveUrl
     function triggerScraper() {
         setIsLoading(true);
-        
+        setIsScrapingJobActive(true);
         setStatusMessage("Starting AI background scraper...");
         setLiveUrl(null);
 
