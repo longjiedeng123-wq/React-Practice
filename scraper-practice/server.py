@@ -2,7 +2,7 @@ from fastapi import FastAPI, BackgroundTasks
 from fastapi.middleware.cors import CORSMiddleware
 import asyncio
 
-
+from database import get_agent_catalog, get_all_products
 from services import job_state, run_scraping_pipeline, run_albertsons_pipeline
 
 import os
@@ -83,15 +83,7 @@ async def chat_with_grocery_agent(payload: dict):
     user_prompt = payload.get("user_prompt", "")
     print(f"Received user prompt: {user_prompt}")
 
-    response = supabase.table("products").select(
-        "english_name, base_unit_type, price_history(discount_price, original_price)"
-    ).execute()
-
-    catalog = json.dumps([{
-        "name": p["english_name"],
-        "unit": p["base_unit_type"],
-        "price": p["price_history"][0].get("discount_price") if p.get("price_history") else None
-    } for p in response.data])
+    catalog = get_agent_catalog()
 
     # 3. Inject the raw data into the system instruction
     system_instruction = f"""

@@ -2,6 +2,7 @@ import os
 from dotenv import load_dotenv
 import asyncio
 from supabase import create_client, Client
+import json
 
 load_dotenv()
 
@@ -104,3 +105,16 @@ def get_all_products() -> list:
         })
 
     return formatted_products
+
+def get_agent_catalog() -> str:
+    response = supabase.table("products").select(
+        "english_name, base_unit_type, price_history(discount_price, original_price)"
+    ).execute()
+
+    catalog_data = [{
+        "name": p["english_name"],
+        "unit": p["base_unit_type"],
+        "price": p["price_history"][0].get("discount_price") if p.get("price_history") else None
+    } for p in response.data]
+    
+    return json.dumps(catalog_data)
