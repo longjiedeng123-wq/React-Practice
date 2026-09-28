@@ -117,7 +117,7 @@ function App() {
                         {isLoading ? "Fetching ..." : "Surprise Me!"}
                 </button>
                 
-                <Fetch99Ranch updateGroceries={handleFetchedItems} />
+                
 				<button 
 					className="remove-all-btn"
 					onClick={removeAllItem}
@@ -125,6 +125,7 @@ function App() {
 					remove all
 				</button>
             </div>
+			<Fetch99Ranch updateGroceries={handleFetchedItems} />
 			
 			<ul className="grocery-list">
                 {groceries.map((item, index) => {

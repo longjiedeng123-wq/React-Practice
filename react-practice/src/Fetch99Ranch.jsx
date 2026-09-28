@@ -4,14 +4,20 @@ function Fetch99Ranch({updateGroceries}) {
     const [isLoading, setIsLoading] = useState(false);
     const [ statusMessage, setStatusMessage ] = useState("");
     const [userPrompt, setUserPrompt] = useState("");
+    const [liveUrl, setLiveUrl] = useState(null);
     function triggerScraper() {
         setIsLoading(true);
+        
         setStatusMessage("Starting AI background scraper...");
+        setLiveUrl(null);
 
         fetch(import.meta.env.VITE_SCRAPING || "http://127.0.0.1:8000/api/prices")
         .then(response => response.json())
         .then(data => {
             setStatusMessage(data.message); 
+            if (data.iframe_url) {
+                setLiveUrl(data.iframe_url); // <-- Save the cloud URL
+            }
         })
         .catch(error => {
             console.error("fetch error: ", error);
@@ -132,6 +138,13 @@ function Fetch99Ranch({updateGroceries}) {
             </div>
 
             {statusMessage && <p style={{ fontSize: "14px", color: "#4b5563", margin: "0", textAlign: "center" }}>{statusMessage}</p>}
+            {liveUrl && (
+                <iframe 
+                    src={liveUrl} 
+                    style={{ width: "100%", height: "500px", border: "1px solid #ccc", borderRadius: "8px", marginTop: "15px" }}
+                    title="Live Browser Session"
+                />
+            )}
         </div>
     );
 }
