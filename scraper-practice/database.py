@@ -79,3 +79,28 @@ async def save_grocery_items(store_id: str, extracted_items: list):
         # 4. Await the wrapper in a background thread
         price_response = await asyncio.to_thread(sync_insert_prices)
         print(f"Inserted {len(price_response.data)} price records.")
+
+
+def get_all_products() -> list:
+    response = supabase.table("products").select(
+        "english_name, chinese_name, base_unit_type, price_history(original_price, discount_price, valid_dates, taxable, has_crv)"
+    ).execute()
+
+    formatted_products = []
+    for product in response.data:
+        p: dict = product 
+        history: list = p.get("price_history", [])
+
+        latest_price: dict = history[0] if history else {}
+
+        formatted_products.append({
+            "english_name": p.get("english_name"),
+            "chinese_name": p.get("chinese_name"),
+            "unit": p.get("base_unit_type"),
+            "original_price": latest_price.get("original_price"),
+            "discount_price": latest_price.get("discount_price"),
+            "taxable": latest_price.get("taxable"),
+            "has_crv": latest_price.get("has_crv")
+        })
+
+    return formatted_products
