@@ -141,7 +141,14 @@ function Fetch99Ranch({updateGroceries}) {
             {liveUrl && (
                 <iframe 
                     src={liveUrl} 
-                    style={{ width: "100%", height: "500px", border: "1px solid #ccc", borderRadius: "8px", marginTop: "15px" }}
+                    style={{ 
+                        width: "100%", 
+                        height: "650px", // <-- Increased height
+                        border: "1px solid #ccc", 
+                        borderRadius: "8px", 
+                        marginTop: "15px",
+                        pointerEvents: "none" // <-- THE GLASS WALL
+                    }}
                     title="Live Browser Session"
                 />
             )}
