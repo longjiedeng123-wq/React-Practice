@@ -2,7 +2,8 @@ from fastapi import FastAPI, BackgroundTasks
 from fastapi.middleware.cors import CORSMiddleware
 import asyncio
 
-from database import get_agent_catalog, get_all_products
+from ai_agent import ask_grocery_agent
+from database import  get_all_products
 from services import job_state, run_scraping_pipeline, run_albertsons_pipeline
 
 import os
@@ -11,15 +12,12 @@ from supabase import create_client, Client
 
 from pydantic import BaseModel
 from typing import List, Optional
-from google import genai
 
 import json
-
 
 load_dotenv()
 
 
-ai_client = genai.Client()
 app = FastAPI()
 
 
@@ -66,16 +64,6 @@ def get_saved_products():
         "data": products
     }
 
-class AgentItem(BaseModel):
-    english_name: str
-    discount_price: float
-    original_price: Optional[float] = None
-    unit: Optional[str] = None
-
-class AgentResponse(BaseModel):
-    conversational_message: str
-    ui_items: List[AgentItem]
-
 
 
 @app.post("/api/agent")
@@ -83,29 +71,9 @@ async def chat_with_grocery_agent(payload: dict):
     user_prompt = payload.get("user_prompt", "")
     print(f"Received user prompt: {user_prompt}")
 
-    catalog = get_agent_catalog()
+    response_data = await ask_grocery_agent(user_prompt)
 
-    # 3. Inject the raw data into the system instruction
-    system_instruction = f"""
-    You are an expert grocery assistant and nutritionist.
-    Here is the live grocery catalog with prices: {catalog}
-    
-    When the user asks a question, use your internal knowledge to calculate nutritional value (like protein per dollar) based strictly on these provided items.
-    Provide a helpful conversational message summarizing your reasoning, and return the specific items they should buy.
-    """
-
-    # 4. Generate content without the tool
-    ai_response = await ai_client.aio.models.generate_content(
-        model='gemini-3.6-flash',
-        contents=user_prompt,
-        config={
-            "system_instruction": system_instruction,
-            "response_mime_type": "application/json",
-            "response_schema": AgentResponse,
-        }
-    )
-
-    return json.loads(ai_response.text)
+    return response_data
 
 
 
