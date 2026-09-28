@@ -2,11 +2,8 @@ from fastapi import FastAPI, BackgroundTasks
 from fastapi.middleware.cors import CORSMiddleware
 import asyncio
 
-from ranch_scraper import scrape_ad_images
-from albertsons_scraper import intercept_albertsons_ad
-from ai_extractor import extract_prices
-from browser_session import create_live_session
-from database import supabase, get_or_create_store, save_grocery_items, get_all_products
+
+from services import job_state, run_scraping_pipeline, run_albertsons_pipeline
 
 import os
 from dotenv import load_dotenv
@@ -24,9 +21,7 @@ load_dotenv()
 
 ai_client = genai.Client()
 app = FastAPI()
-job_state = {
-    "status": "idle" # Phases: "idle" -> "scraping" -> "processing"
-}
+
 
 
 frontend_urls_str = os.environ.get("FRONTEND_URLS", "")
@@ -39,27 +34,6 @@ app.add_middleware(
     allow_methods=["*"],
     allow_headers=["*"]
 )
-
-
-
-
-
-
-async def run_scraping_pipeline(connect_url: str = None):
-    try:
-        job_state["status"] = "scraping"
-
-        image_paths = await scrape_ad_images(connect_url)
-        job_state["status"] = "processing"
-        print("~~~~~~~~scrape success~~~~~~~")
-        all_products = await extract_prices(image_paths)
-
-        store_id = await asyncio.to_thread(get_or_create_store, "99 Ranch")
-        await save_grocery_items(store_id, all_products)
-    finally:
-        # Guarantee we reset the state when done
-        job_state["status"] = "idle"
-        print("Background scraping job fully completed.")
 
 
 @app.get("/")
@@ -142,21 +116,7 @@ async def chat_with_grocery_agent(payload: dict):
     return json.loads(ai_response.text)
 
 
-async def run_albertsons_pipeline(connect_url: str = None):
-    try:
-        job_state["status"] = "scraping" # <-- Phase 1
-        print("Starting Albertsons scraping pipeline...")
-        
-        sanitized_items = await intercept_albertsons_ad(connect_url)
-        
-        job_state["status"] = "processing"  # <-- Phase 2 (will finish very quickly)
-        if sanitized_items:
-            store_id = await asyncio.to_thread(get_or_create_store, "Albertsons")
-            await save_grocery_items(store_id, sanitized_items)
-            
-    finally:
-        job_state["status"] = "idle" # <-- Phase 3
-        print("Albertsons scraping job fully completed.")
+
 
 @app.get("/api/scrape-albertsons")
 async def trigger_albertsons_scrape(background_tasks: BackgroundTasks):
