@@ -11,7 +11,8 @@ function ScraperDashboard({updateGroceries, loadSavedProducts}) {
         // We now poll based on the job being active, not the iframe existing
         if (isScrapingJobActive) {
             intervalId = setInterval(() => {
-                fetch("http://127.0.0.1:8000/api/status")
+                const baseUrl = import.meta.env.VITE_API_BASE_URL || "http://127.0.0.1:8000";
+                fetch(`${baseUrl}/api/status`)
                 .then(res => res.json())
                 .then(data => {
                     if (data.status === "processing") {
@@ -39,8 +40,8 @@ function ScraperDashboard({updateGroceries, loadSavedProducts}) {
         setIsScrapingJobActive(true);
         setStatusMessage("Starting AI background scraper...");
         setLiveUrl(null);
-
-        fetch(import.meta.env.VITE_SCRAPING || "http://127.0.0.1:8000/api/prices")
+        const baseUrl = import.meta.env.VITE_API_BASE_URL || "http://127.0.0.1:8000";
+        fetch(`${baseUrl}/api/prices`)
         .then(response => response.json())
         .then(data => {
             setStatusMessage(data.message); 
@@ -61,9 +62,9 @@ function ScraperDashboard({updateGroceries, loadSavedProducts}) {
         setIsLoading(true);
         setStatusMessage("Starting Albertsons background scraper...");
         setIsScrapingJobActive(true);
-
         setLiveUrl(null);
-        fetch(import.meta.env.VITE_ALBERTSONS_SCRAPING || "http://127.0.0.1:8000/api/scrape-albertsons")
+        const baseUrl = import.meta.env.VITE_API_BASE_URL || "http://127.0.0.1:8000";
+        fetch(`${baseUrl}/api/scrape-albertsons`)
         .then(response => response.json())
         .then(data => {
             setStatusMessage(data.message); 

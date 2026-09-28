@@ -100,14 +100,12 @@ function App() {
 	function removeAllItem() {
 		setGroceries([]);
 	}
-	function zipCodeSearch() {
-		fetch("http://127.0.0.1:8000/api/test");
-	}
+	
 	function loadSavedProducts() {
         setIsLoading(true);
         // Removed setStatusMessage because App.jsx doesn't have that state
-
-        fetch(import.meta.env.VITE_DATABASE || "http://127.0.0.1:8000/api/products")
+		const baseUrl = import.meta.env.VITE_API_BASE_URL || "http://127.0.0.1:8000";
+        fetch(`${baseUrl}/api/products`)
         .then(response => response.json())
         .then(responseData => {
             if (responseData.status === "success") {
@@ -184,9 +182,7 @@ function App() {
 			>
 				Don't click me!
 			</button>
-			<button
-				onClick={zipCodeSearch}
-			>test zip code search</button>
+			
 		</div> 
 	); 
 }

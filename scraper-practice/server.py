@@ -1,19 +1,16 @@
 from fastapi import FastAPI, BackgroundTasks
 from fastapi.middleware.cors import CORSMiddleware
-import asyncio
+
 
 from ai_agent import ask_grocery_agent
 from database import  get_all_products
 from services import job_state, run_scraping_pipeline, run_albertsons_pipeline
+from browser_session import create_live_session
 
 import os
 from dotenv import load_dotenv
-from supabase import create_client, Client
 
-from pydantic import BaseModel
-from typing import List, Optional
 
-import json
 
 load_dotenv()
 
