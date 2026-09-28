@@ -5,6 +5,8 @@ import asyncio
 from ranch_scraper import scrape_ad_images
 from albertsons_scraper import intercept_albertsons_ad
 from ai_extractor import extract_prices
+from browser_session import create_live_session
+from database import supabase, get_or_create_store
 
 import os
 from dotenv import load_dotenv
@@ -19,12 +21,12 @@ import json
 
 load_dotenv()
 
-url : str = os.environ.get("SUPABASE_URL", "")
-key : str = os.environ.get("SUPABASE_KEY", "")
-supabase : Client = create_client(url, key)
 
 ai_client = genai.Client()
 app = FastAPI()
+job_state = {
+    "status": "idle" # Phases: "idle" -> "scraping" -> "processing"
+}
 
 
 frontend_urls_str = os.environ.get("FRONTEND_URLS", "")
@@ -38,14 +40,7 @@ app.add_middleware(
     allow_headers=["*"]
 )
 
-def get_or_create_store(store_name: str) -> str:
-    response = supabase.table("stores").select("id").eq("name", store_name).execute()
 
-    if response.data:
-        return response.data[0]["id"] # type: ignore
-
-    new_store = supabase.table("stores").insert({"name": store_name}).execute()
-    return new_store.data[0]["id"] # type: ignore
 
 async def save_grocery_items(store_id: str, extracted_items: list):
 
@@ -110,14 +105,21 @@ async def save_grocery_items(store_id: str, extracted_items: list):
         print(f"Inserted {len(price_response.data)} price records.")
 
 
-async def run_scraping_pipeline():
-    image_paths = await scrape_ad_images()
+async def run_scraping_pipeline(connect_url: str = None):
+    try:
+        job_state["status"] = "scraping"
 
-    print("~~~~~~~~scrape success~~~~~~~")
-    all_products = await extract_prices(image_paths)
+        image_paths = await scrape_ad_images(connect_url)
+        job_state["status"] = "processing"
+        print("~~~~~~~~scrape success~~~~~~~")
+        all_products = await extract_prices(image_paths)
 
-    store_id = await asyncio.to_thread(get_or_create_store, "99 Ranch")
-    await save_grocery_items(store_id, all_products)
+        store_id = await asyncio.to_thread(get_or_create_store, "99 Ranch")
+        await save_grocery_items(store_id, all_products)
+    finally:
+        # Guarantee we reset the state when done
+        job_state["status"] = "idle"
+        print("Background scraping job fully completed.")
 
 
 @app.get("/")
@@ -128,13 +130,16 @@ def root():
 async def get_grocery_prices(background_tasks: BackgroundTasks):
     
     print("API called: Starting scraping process...")
+    session_id, connect_url, iframe_url = await create_live_session()
 
-    background_tasks.add_task(run_scraping_pipeline)
+    background_tasks.add_task(run_scraping_pipeline, connect_url)
 
     
     return {
-        "status" : "success",
-        "message" : "Scraping started in the background. Data will be available soon."
+        "status": "success",
+        "message": "Scraping started in the cloud.",
+        "iframe_url": iframe_url,
+        "session_id": session_id
     }
 
 @app.get('/api/products')
@@ -218,22 +223,38 @@ async def chat_with_grocery_agent(payload: dict):
     return json.loads(ai_response.text)
 
 
-async def run_albertsons_pipeline():
-    print("Starting Albertsons scraping pipeline...")
-    sanitized_items = await intercept_albertsons_ad()
-
-    print(json.dumps(sanitized_items, indent=2))
-    print(f"~~~~~~~~Albertsons scrape success: {len(sanitized_items)} items ~~~~~~~")
-    if sanitized_items:
-        store_id = await asyncio.to_thread(get_or_create_store, "Albertsons")
-        await save_grocery_items(store_id, sanitized_items)
+async def run_albertsons_pipeline(connect_url: str = None):
+    try:
+        job_state["status"] = "scraping" # <-- Phase 1
+        print("Starting Albertsons scraping pipeline...")
+        
+        sanitized_items = await intercept_albertsons_ad(connect_url)
+        
+        job_state["status"] = "processing"  # <-- Phase 2 (will finish very quickly)
+        if sanitized_items:
+            store_id = await asyncio.to_thread(get_or_create_store, "Albertsons")
+            await save_grocery_items(store_id, sanitized_items)
+            
+    finally:
+        job_state["status"] = "idle" # <-- Phase 3
+        print("Albertsons scraping job fully completed.")
 
 @app.get("/api/scrape-albertsons")
 async def trigger_albertsons_scrape(background_tasks: BackgroundTasks):
     print("API called: Starting Albertsons scraping process...")
-    background_tasks.add_task(run_albertsons_pipeline)
+    session_id, connect_url, iframe_url = await create_live_session()
     
+    # 2. Start the background task
+    background_tasks.add_task(run_albertsons_pipeline, connect_url)
+    
+    # 3. Return the UI endpoints to React
     return {
-        "status" : "success",
-        "message" : "Albertsons scraping started in the background."
+        "status": "success",
+        "message": "Albertsons scraping started in the cloud.",
+        "iframe_url": iframe_url,
+        "session_id": session_id
     }
+
+@app.get("/api/status")
+def get_scraping_status():
+    return {"status": job_state["status"]}

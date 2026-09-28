@@ -2,7 +2,7 @@ import asyncio
 from playwright.async_api import async_playwright
 from sanitize_albertsons import sanitize_albertsons_flipp_item, sanitize_albertsons_j4u_item
 
-async def intercept_albertsons_ad():
+async def intercept_albertsons_ad(connect_url: str = None):
     captured_payloads = []
 
     async def handle_response(response):
@@ -38,8 +38,14 @@ async def intercept_albertsons_ad():
 
     async with async_playwright() as p:
         # Launch the browser in visible mode
-        browser = await p.chromium.launch(headless=False)
-        page = await browser.new_page()
+
+        if connect_url:
+            browser = await p.chromium.connect_over_cdp(connect_url)
+            context = browser.contexts[0]
+            page = context.pages[0]
+        else:
+            browser = await p.chromium.launch(headless=False)
+            page = await browser.new_page()
 
         page.on("response", handle_response)
 
