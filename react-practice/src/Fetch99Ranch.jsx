@@ -61,11 +61,16 @@ function Fetch99Ranch({updateGroceries}) {
     function triggerAlbertsonsScraper() {
         setIsLoading(true);
         setStatusMessage("Starting Albertsons background scraper...");
+        setIsScrapingJobActive(true);
 
+        setLiveUrl(null);
         fetch(import.meta.env.VITE_ALBERTSONS_SCRAPING || "http://127.0.0.1:8000/api/scrape-albertsons")
         .then(response => response.json())
         .then(data => {
             setStatusMessage(data.message); 
+            if (data.iframe_url) {
+                setLiveUrl(data.iframe_url); // <-- Capture the Browserbase cloud session URL
+            }
         })
         .catch(error => {
             console.error("fetch error: ", error);
