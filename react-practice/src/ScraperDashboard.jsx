@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 
-function Fetch99Ranch({updateGroceries}) {
+function ScraperDashboard({updateGroceries, loadSavedProducts}) {
     const [isLoading, setIsLoading] = useState(false);
     const [ statusMessage, setStatusMessage ] = useState("");
     const [liveUrl, setLiveUrl] = useState(null);
@@ -80,26 +80,7 @@ function Fetch99Ranch({updateGroceries}) {
         });
     }
 
-    function loadSavedProducts() {
-        setIsLoading(true);
-        setStatusMessage("Fetching database...");
-
-        fetch(import.meta.env.VITE_DATABASE || "http://127.0.0.1:8000/api/products")
-        .then(response => response.json())
-        .then(responseData => {
-            if (responseData.status === "success") {
-                const validItems = responseData.data.filter(item => item.english_name != null);
-                console.log("Database Payload:", validItems);
-                updateGroceries(validItems)
-                setStatusMessage(`Loaded ${validItems.length} items from database!`)
-            }
-        }).catch(error => {
-            console.error("fetch error: ", error);
-            setStatusMessage("Error loading products.");
-        }).finally(() => {
-            setIsLoading(false);
-        });
-    }
+    
 
     
 
@@ -117,13 +98,6 @@ function Fetch99Ranch({updateGroceries}) {
                 disabled={isLoading}
                 onClick={triggerAlbertsonsScraper}>
                 Trigger Albertsons Scrape
-            </button>
-            <button 
-                className="fetch-btn"
-                style={{ backgroundColor: "#3b82f6" }}
-                disabled={isLoading}
-                onClick={loadSavedProducts}>
-                Load Saved Groceries
             </button>
             
             
@@ -148,4 +122,4 @@ function Fetch99Ranch({updateGroceries}) {
     );
 }
 
-export default Fetch99Ranch;
+export default ScraperDashboard;

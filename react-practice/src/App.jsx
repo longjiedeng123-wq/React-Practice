@@ -2,7 +2,7 @@ import './App.css';
 import AiAgent from './AiAgent.jsx';
 import AddForm from './AddForm.jsx'; 
 import GroceryItem from './GroceryItem.jsx';
-import Fetch99Ranch from './Fetch99Ranch.jsx';
+import ScraperDashboard from './ScraperDashboard.jsx';
 
 import { useState, useEffect} from 'react';
 
@@ -103,6 +103,28 @@ function App() {
 	function zipCodeSearch() {
 		fetch("http://127.0.0.1:8000/api/test");
 	}
+	function loadSavedProducts() {
+        setIsLoading(true);
+        // Removed setStatusMessage because App.jsx doesn't have that state
+
+        fetch(import.meta.env.VITE_DATABASE || "http://127.0.0.1:8000/api/products")
+        .then(response => response.json())
+        .then(responseData => {
+            if (responseData.status === "success") {
+                const validItems = responseData.data.filter(item => item.english_name != null);
+                console.log("Database Payload:", validItems);
+                
+                // Changed from updateGroceries to the actual local function name:
+                handleFetchedItems(validItems); 
+            }
+        }).catch(error => {
+            console.error("fetch error: ", error);
+        }).finally(() => {
+            setIsLoading(false);
+        });
+    }
+
+
 	return ( 
 		<div className = "app-container"> 
 			<h1 className = "app-title">
@@ -125,7 +147,21 @@ function App() {
 					remove all
 				</button>
             </div>
-			<Fetch99Ranch updateGroceries={handleFetchedItems} />
+			<div style={{ display: "flex", gap: "10px", marginTop: "10px" }}>
+                <button 
+                    className="load-btn"
+                    style={{ backgroundColor: "#3b82f6", color: "white", padding: "8px", borderRadius: "4px" }}
+                    onClick={loadSavedProducts}
+                >
+                    Load Saved Groceries
+                </button>
+            </div>
+
+            {/* Pass loadSavedProducts so the dashboard can trigger it when the cloud job finishes */}
+            <ScraperDashboard 
+                updateGroceries={handleFetchedItems} 
+                loadSavedProducts={loadSavedProducts} 
+            />
 			<AiAgent updateGroceries={handleFetchedItems} />
 			<ul className="grocery-list">
                 {groceries.map((item, index) => {
