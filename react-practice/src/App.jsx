@@ -1,5 +1,5 @@
 import './App.css';
-
+import AiAgent from './AiAgent.jsx';
 import AddForm from './AddForm.jsx'; 
 import GroceryItem from './GroceryItem.jsx';
 import Fetch99Ranch from './Fetch99Ranch.jsx';
@@ -126,7 +126,7 @@ function App() {
 				</button>
             </div>
 			<Fetch99Ranch updateGroceries={handleFetchedItems} />
-			
+			<AiAgent updateGroceries={handleFetchedItems} />
 			<ul className="grocery-list">
                 {groceries.map((item, index) => {
                     const itemName = extractItemName(item);
